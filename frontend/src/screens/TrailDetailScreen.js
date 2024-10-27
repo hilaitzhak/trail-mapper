@@ -1,14 +1,35 @@
 // frontend/src/screens/TrailDetailScreen.js
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { trailService } from '../services/trailService';
 import MapComponent from '../components/MapComponent';
-import { Mountain, Route, Calendar, User } from 'lucide-react';
+import { 
+  Mountain, 
+  Route, 
+  Calendar, 
+  User, 
+  Clock, 
+  MapPin, 
+  ArrowLeft,
+  ThermometerSun,
+  Wind,
+  Droplets
+} from 'lucide-react';
 
 const TrailDetailScreen = () => {
   const { id } = useParams();
   const [trail, setTrail] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Split difficulty into riding type and level
+  const splitDifficulty = (difficulty) => {
+    if (!difficulty) return { ridingType: '', difficultyLevel: '' };
+    const parts = difficulty.split(',').map(part => part.trim());
+    return {
+      ridingType: parts[0] || '',
+      difficultyLevel: parts[1] || parts[0]
+    };
+  };
 
   useEffect(() => {
     const fetchTrail = async () => {
@@ -25,63 +46,148 @@ const TrailDetailScreen = () => {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center py-8">Loading trail information...</div>;
+    return <div className="text-center py-8">טוען מידע על המסלול...</div>;
   }
 
   if (!trail) {
-    return <div className="text-center py-8">Trail not found</div>;
+    return <div className="text-center py-8">המסלול לא נמצא</div>;
   }
 
+  const { ridingType, difficultyLevel } = splitDifficulty(trail.properties.difficulty);
+
+  // Mock weather data - replace with actual API call
+  const weatherData = {
+    temperature: 22,
+    windSpeed: 10,
+    precipitation: 0
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="max-w-7xl mx-auto px-4 py-6" dir="rtl">
+      {/* Back Button */}
+      <Link 
+        to="/search" 
+        className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4"
+      >
+        <ArrowLeft className="h-4 w-4 ml-1" />
+        חזרה לחיפוש
+      </Link>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <h1 className="text-3xl font-bold mb-4">{trail.properties.name}</h1>
           
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+              {/* Riding Type */}
               <div className="flex items-center">
-                <Mountain className="h-5 w-5 text-blue-600 mr-2" />
+                <Mountain className="h-5 w-5 text-blue-600 ml-2" />
                 <div>
-                  <p className="text-sm text-gray-600">Difficulty</p>
-                  <p className="font-semibold">{trail.properties.difficulty}</p>
+                  <p className="text-sm text-gray-600">אופי הרכיבה</p>
+                  <p className="font-semibold">{ridingType}</p>
                 </div>
               </div>
+
+              {/* Difficulty Level */}
               <div className="flex items-center">
-                <Route className="h-5 w-5 text-blue-600 mr-2" />
+                <Route className="h-5 w-5 text-blue-600 ml-2" />
                 <div>
-                  <p className="text-sm text-gray-600">Distance</p>
-                  <p className="font-semibold">{trail.properties.distance}km</p>
+                  <p className="text-sm text-gray-600">רמת קושי</p>
+                  <p className="font-semibold">{difficultyLevel}</p>
                 </div>
               </div>
+
+              {/* Distance */}
               <div className="flex items-center">
-                <User className="h-5 w-5 text-blue-600 mr-2" />
+                <Route className="h-5 w-5 text-blue-600 ml-2" />
                 <div>
-                  <p className="text-sm text-gray-600">Creator</p>
+                  <p className="text-sm text-gray-600">מרחק</p>
+                  <p className="font-semibold">{trail.properties.distance} ק"מ</p>
+                </div>
+              </div>
+
+              {/* Duration */}
+              <div className="flex items-center">
+                <Clock className="h-5 w-5 text-blue-600 ml-2" />
+                <div>
+                  <p className="text-sm text-gray-600">זמן משוער</p>
+                  <p className="font-semibold">{trail.properties.time} שעות</p>
+                </div>
+              </div>
+
+              {/* Creator */}
+              <div className="flex items-center">
+                <User className="h-5 w-5 text-blue-600 ml-2" />
+                <div>
+                  <p className="text-sm text-gray-600">יוצר המסלול</p>
                   <p className="font-semibold">{trail.properties.creator}</p>
                 </div>
               </div>
+
+              {/* Date */}
               <div className="flex items-center">
-                <Calendar className="h-5 w-5 text-blue-600 mr-2" />
+                <Calendar className="h-5 w-5 text-blue-600 ml-2" />
                 <div>
-                  <p className="text-sm text-gray-600">Date</p>
+                  <p className="text-sm text-gray-600">תאריך</p>
                   <p className="font-semibold">{trail.properties.date}</p>
                 </div>
               </div>
             </div>
 
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">Location</h2>
+            {/* Location Section */}
+            <div className="mb-8">
+              <div className="flex items-center mb-2">
+                <MapPin className="h-5 w-5 text-blue-600 ml-2" />
+                <h2 className="text-xl font-semibold">מיקום</h2>
+              </div>
               <p className="text-gray-700">{trail.properties.area}</p>
             </div>
 
-            <div className="h-[400px] relative">
+            {/* Map */}
+            <div className="h-[400px] relative rounded-lg overflow-hidden">
               <MapComponent trails={[trail]} centered={true} />
             </div>
           </div>
         </div>
 
-        {/* Weather info section remains the same */}
+        {/* Weather Info */}
+        <div>
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-semibold mb-6">מזג אוויר נוכחי</h2>
+            <div className="space-y-6">
+              <div className="flex items-center">
+                <ThermometerSun className="h-5 w-5 text-blue-600 ml-3" />
+                <div>
+                  <p className="text-sm text-gray-600">טמפרטורה</p>
+                  <p className="font-semibold">{weatherData.temperature}°C</p>
+                </div>
+              </div>
+              <div className="flex items-center">
+                <Wind className="h-5 w-5 text-blue-600 ml-3" />
+                <div>
+                  <p className="text-sm text-gray-600">מהירות רוח</p>
+                  <p className="font-semibold">{weatherData.windSpeed} קמ"ש</p>
+                </div>
+              </div>
+              <div className="flex items-center">
+                <Droplets className="h-5 w-5 text-blue-600 ml-3" />
+                <div>
+                  <p className="text-sm text-gray-600">סיכוי לגשם</p>
+                  <p className="font-semibold">{weatherData.precipitation}%</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Additional Useful Info */}
+          {trail.properties.hasGps === "Yes" && (
+            <div className="mt-6 bg-blue-50 rounded-lg p-4">
+              <p className="text-sm text-blue-700">
+                ✓ מסלול זה כולל נתוני GPS מדויקים
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

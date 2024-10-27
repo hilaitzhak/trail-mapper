@@ -11,8 +11,13 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <Link to="/" className="flex items-center">
-              <Map className="h-6 w-6 text-blue-600" />
-              <span className="ml-2 text-xl font-semibold">Trail Mapper</span>
+              {/* <Map className="h-6 w-6 text-blue-600" /> */}
+              {/* <span className="ml-2 text-xl font-semibold">Trail Mapper</span> */}
+                <img 
+                src="../logo.png" 
+                alt="Trail Mapping" 
+                className="h-8 w-auto ml-2"
+              />
             </Link>
           </div>
           <div className="flex items-center">
