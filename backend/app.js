@@ -34,10 +34,10 @@ app.get('/api/trails', async (req, res) => {
   }
 });
 
-// Filter trails (this should come before the /:id route)
 app.get('/api/trails/search', async (req, res) => {
   try {
-    const { difficulty, distance, area } = req.query;
+    const { ridingType, difficultyLevel, distance, area } = req.query;
+    console.log('req.query: ', req.query);  
     const trailsData = await getTrailsData();
     
     if (!trailsData) {
@@ -45,11 +45,22 @@ app.get('/api/trails/search', async (req, res) => {
     }
 
     let filteredTrails = trailsData.features;
+    console.log('filteredTrails: ', filteredTrails);  
 
-    if (difficulty) {
-      filteredTrails = filteredTrails.filter(
-        trail => trail.properties.difficulty.toLowerCase().includes(difficulty.toLowerCase())
-      );
+    if (ridingType || difficultyLevel) {
+      filteredTrails = filteredTrails.filter(trail => {
+        const difficulty = trail.properties.difficulty;
+        if (!difficulty) return false;
+        
+        const parts = difficulty.split(',').map(part => part.trim());
+        const trailRidingType = parts[0] || '';
+        const trailDifficultyLevel = parts[1] || parts[0];
+
+        const matchesRidingType = !ridingType || trailRidingType === ridingType;
+        const matchesDifficulty = !difficultyLevel || trailDifficultyLevel === difficultyLevel;
+
+        return matchesRidingType && matchesDifficulty;
+      });
     }
 
     if (distance) {
@@ -60,7 +71,7 @@ app.get('/api/trails/search', async (req, res) => {
 
     if (area) {
       filteredTrails = filteredTrails.filter(
-        trail => trail.properties.area.toLowerCase().includes(area.toLowerCase())
+        trail => trail.properties.area === area
       );
     }
 
@@ -69,6 +80,7 @@ app.get('/api/trails/search', async (req, res) => {
       features: filteredTrails
     });
   } catch (error) {
+    console.error('Error filtering trails:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });

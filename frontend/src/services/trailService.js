@@ -27,7 +27,9 @@ export const trailService = {
   filterTrails: async (filters) => {
     try {
       const params = new URLSearchParams();
-      if (filters.difficulty) params.append('difficulty', filters.difficulty);
+      // Add the new split parameters
+      if (filters.ridingType) params.append('ridingType', filters.ridingType);
+      if (filters.difficultyLevel) params.append('difficultyLevel', filters.difficultyLevel);
       if (filters.distance) params.append('distance', filters.distance);
       if (filters.area) params.append('area', filters.area);
       
