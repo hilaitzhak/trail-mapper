@@ -21,7 +21,7 @@ const Navbar = () => {
               className="flex items-center px-3 py-2 rounded-md text-gray-700 hover:text-blue-600"
             >
               <Search className="h-5 w-5" />
-              <span className="ml-1">Search Trails</span>
+              <span className="ml-1">חיפוש מסלולים</span>
             </Link>
           </div>
         </div>

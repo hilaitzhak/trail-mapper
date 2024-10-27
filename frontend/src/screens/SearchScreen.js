@@ -41,9 +41,18 @@ const SearchScreen = () => {
     setLoading(true);
     try {
       const data = await trailService.filterTrails(filters);
-      setTrails(data.features);
+      // Filter out trails without valid coordinates
+      const validTrails = data.features.filter(trail => 
+        trail && 
+        trail.geometry && 
+        trail.geometry.coordinates && 
+        trail.geometry.coordinates.length > 0 &&
+        trail.properties
+      );
+      setTrails(validTrails);
     } catch (error) {
       console.error('Error fetching trails:', error);
+      setTrails([]);
     }
     setLoading(false);
   };
@@ -114,10 +123,14 @@ const SearchScreen = () => {
         </div>
       </div>
 
-      {/* Map and Results */}
+       {/* Map and Results */}
       <div className="flex-1 flex flex-col">
         <div className="h-1/2">
-          <MapComponent trails={trails} />
+          <MapComponent trails={trails.filter(trail => 
+            trail.geometry && 
+            trail.geometry.coordinates && 
+            trail.geometry.coordinates.length > 0
+          )} />
         </div>
         <div className="h-1/2 overflow-y-auto p-4 bg-gray-50">
           <h3 className="text-lg font-semibold mb-4">
@@ -138,7 +151,7 @@ const SearchScreen = () => {
                   <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
                     <div className="flex items-center">
                       <Mountain className="h-4 w-4 ml-1" />
-                      {extractDifficultyLevel(trail.properties.difficulty)}
+                      {trail.properties.difficulty}
                     </div>
                     <div className="flex items-center">
                       <Route className="h-4 w-4 ml-1" />
