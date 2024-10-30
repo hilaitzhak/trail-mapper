@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { trailService } from '../services/trailService';
 import MapComponent from '../components/MapComponent';
+import WeatherInfo from '../components/WeatherInfo';
+
 import { 
   Mountain, 
   Route, 
@@ -10,10 +12,7 @@ import {
   User, 
   Clock, 
   MapPin, 
-  ArrowLeft,
-  ThermometerSun,
-  Wind,
-  Droplets
+  ArrowLeft
 } from 'lucide-react';
 
 const TrailDetailScreen = () => {
@@ -152,40 +151,8 @@ const TrailDetailScreen = () => {
 
         {/* Weather Info */}
         <div>
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold mb-6">מזג אוויר נוכחי</h2>
-            <div className="space-y-6">
-              <div className="flex items-center">
-                <ThermometerSun className="h-5 w-5 text-blue-600 ml-3" />
-                <div>
-                  <p className="text-sm text-gray-600">טמפרטורה</p>
-                  <p className="font-semibold">{weatherData.temperature}°C</p>
-                </div>
-              </div>
-              <div className="flex items-center">
-                <Wind className="h-5 w-5 text-blue-600 ml-3" />
-                <div>
-                  <p className="text-sm text-gray-600">מהירות רוח</p>
-                  <p className="font-semibold">{weatherData.windSpeed} קמ"ש</p>
-                </div>
-              </div>
-              <div className="flex items-center">
-                <Droplets className="h-5 w-5 text-blue-600 ml-3" />
-                <div>
-                  <p className="text-sm text-gray-600">סיכוי לגשם</p>
-                  <p className="font-semibold">{weatherData.precipitation}%</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Additional Useful Info */}
-          {trail.properties.hasGps === "Yes" && (
-            <div className="mt-6 bg-blue-50 rounded-lg p-4">
-              <p className="text-sm text-blue-700">
-                ✓ מסלול זה כולל נתוני GPS מדויקים
-              </p>
-            </div>
+          {trail.geometry && trail.geometry.coordinates && (
+            <WeatherInfo coordinates={trail.geometry.coordinates} />
           )}
         </div>
       </div>
