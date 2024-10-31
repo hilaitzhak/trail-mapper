@@ -8,6 +8,16 @@ const MapComponent = ({ trails = [], centered = false }) => {
   useEffect(() => {
     if (!mapRef.current) return;
 
+    // Filter out trails without geometry
+    const validTrails = trails.filter(trail => 
+      trail && trail.geometry && trail.geometry.coordinates && trail.geometry.coordinates.length > 0
+    );
+
+    if (validTrails.length === 0) {
+      console.log('No valid trails with coordinates to display');
+      return;
+    }
+
     // Initialize map if it hasn't been created yet
     if (!mapInstance.current) {
       // Create vector source and layer for trails

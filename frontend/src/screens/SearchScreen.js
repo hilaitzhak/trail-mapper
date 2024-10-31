@@ -1,4 +1,3 @@
-// src/screens/SearchScreen.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MapComponent from '../components/MapComponent';
@@ -8,77 +7,139 @@ import { Search, Mountain, Route } from 'lucide-react';
 const SearchScreen = () => {
   const navigate = useNavigate();
   const [trails, setTrails] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [allTrails, setAllTrails] = useState([]);
+  const [filteredTrails, setFilteredTrails] = useState([]);
+  const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
-    ridingType: '', // New parameter for XC, etc.
-    difficultyLevel: '', // New parameter for בינוני, etc.
+    ridingType: '',
+    difficultyLevel: '',
     distance: '',
     area: ''
   });
 
-  // Get unique values for filters
   const [uniqueAreas, setUniqueAreas] = useState([]);
   const [uniqueRidingTypes, setUniqueRidingTypes] = useState([]);
   const [uniqueDifficultyLevels, setUniqueDifficultyLevels] = useState([]);
 
-  // Function to split difficulty string into riding type and level
+// Initial data fetch
+useEffect(() => {
+  const fetchInitialData = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching initial data...');
+      const data = await trailService.getAllTrails();
+      console.log('Initial data received:', data);
+
+      if (data && data.features) {
+        // Only include trails with GPS data
+        const trailsWithGPS = data.features.filter(trail => 
+          trail && 
+          trail.properties && 
+          trail.geometry?.coordinates?.length > 0  // Only trails with GPS
+        );
+        
+        console.log(`Found ${trailsWithGPS.length} trails with GPS data`);
+        
+        setAllTrails(trailsWithGPS);
+        setFilteredTrails(trailsWithGPS);
+
+        // Process unique values from GPS trails only
+        const areas = [...new Set(trailsWithGPS.map(trail => trail.properties.area))];
+        const difficultyPairs = trailsWithGPS.map(trail => splitDifficulty(trail.properties.difficulty));
+        
+        const ridingTypes = [...new Set(difficultyPairs.map(d => d.ridingType))].filter(Boolean);
+        const difficultyLevels = [...new Set(difficultyPairs.map(d => d.difficultyLevel))].filter(Boolean);
+
+        console.log('Unique values:', { areas, ridingTypes, difficultyLevels });
+        
+        setUniqueAreas(areas);
+        setUniqueRidingTypes(ridingTypes);
+        setUniqueDifficultyLevels(difficultyLevels);
+      } else {
+        console.error('Invalid data format:', data);
+        setError('No trail data available');
+      }
+    } catch (error) {
+      console.error('Error fetching initial data:', error);
+      setError('Failed to load trails');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchInitialData();
+}, []);
+     // Apply filters whenever they change
+  useEffect(() => {
+    if (!allTrails.length) return;
+
+    console.log('Applying filters:', filters);
+    const filtered = allTrails.filter(trail => {
+      const { ridingType: trailRidingType, difficultyLevel: trailDifficultyLevel } = 
+        splitDifficulty(trail.properties.difficulty);
+
+      // Check riding type
+      if (filters.ridingType && trailRidingType !== filters.ridingType) {
+        return false;
+      }
+
+      // Check difficulty level
+      if (filters.difficultyLevel && trailDifficultyLevel !== filters.difficultyLevel) {
+        return false;
+      }
+
+      // Check area
+      if (filters.area && trail.properties.area !== filters.area) {
+        return false;
+      }
+
+      // Check distance
+      if (filters.distance && parseFloat(trail.properties.distance) > parseFloat(filters.distance)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    console.log(`Filtered trails: ${filtered.length} trails match criteria`);
+    setFilteredTrails(filtered);
+  }, [filters, allTrails]);
+  
   const splitDifficulty = (difficulty) => {
     if (!difficulty) return { ridingType: '', difficultyLevel: '' };
     const parts = difficulty.split(',').map(part => part.trim());
     return {
       ridingType: parts[0] || '',
-      difficultyLevel: parts[1] || parts[0] // If no comma, use the whole string as level
+      difficultyLevel: parts[1] || parts[0]
     };
   };
 
-  // Fetch all trails initially to get unique values
-  useEffect(() => {
-    const fetchAllTrails = async () => {
-      try {
-        const data = await trailService.getAllTrails();
-        const areas = [...new Set(data.features.map(trail => trail.properties.area))];
-        
-        // Get unique riding types and difficulty levels
-        const difficultyPairs = data.features.map(trail => 
-          splitDifficulty(trail.properties.difficulty)
-        );
-        
-        const ridingTypes = [...new Set(difficultyPairs.map(d => d.ridingType))].filter(Boolean);
-        const difficultyLevels = [...new Set(difficultyPairs.map(d => d.difficultyLevel))].filter(Boolean);
-        
-        setUniqueAreas(areas);
-        setUniqueRidingTypes(ridingTypes);
-        setUniqueDifficultyLevels(difficultyLevels);
-      } catch (error) {
-        console.error('Error fetching trail data:', error);
-      }
-    };
+  // Debug rendering
+  console.log('Current state:', {
+    trailsCount: trails.length,
+    loading,
+    error,
+    uniqueAreas,
+    uniqueRidingTypes,
+    uniqueDifficultyLevels
+  });
 
-    fetchAllTrails();
-  }, []);
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-xl">טוען מסלולים...</div>
+      </div>
+    );
+  }
 
-  const fetchTrails = async () => {
-    setLoading(true);
-    try {
-      const data = await trailService.filterTrails(filters);
-      const validTrails = data.features.filter(trail => 
-        trail && 
-        trail.geometry && 
-        trail.geometry.coordinates && 
-        trail.geometry.coordinates.length > 0 &&
-        trail.properties
-      );
-      setTrails(validTrails);
-    } catch (error) {
-      console.error('Error fetching trails:', error);
-      setTrails([]);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchTrails();
-  }, [filters]);
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-xl text-red-500">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col md:flex-row h-[calc(100vh-64px)]" dir="rtl">
@@ -159,19 +220,26 @@ const SearchScreen = () => {
       {/* Map and Results */}
       <div className="flex-1 flex flex-col">
         <div className="h-1/2">
-          <MapComponent trails={trails} />
+          {filteredTrails.length > 0 && (
+            <div className="h-full">
+              <MapComponent trails={filteredTrails} />
+            </div>
+          )}
         </div>
         <div className="h-1/2 overflow-y-auto p-4 bg-gray-50">
           <h3 className="text-lg font-semibold mb-4">
-            תוצאות חיפוש ({trails.length} מסלולים נמצאו)
+            תוצאות חיפוש ({filteredTrails.length} מסלולים נמצאו)
           </h3>
           
-          {loading ? (
-            <div className="text-center py-4">טוען מסלולים...</div>
+          {filteredTrails.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">
+              לא נמצאו מסלולים התואמים את החיפוש
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {trails.map((trail) => {
+              {filteredTrails.map((trail) => {
                 const { ridingType, difficultyLevel } = splitDifficulty(trail.properties.difficulty);
+                
                 return (
                   <div 
                     key={trail.properties.id}
