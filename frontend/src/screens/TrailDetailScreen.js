@@ -12,15 +12,17 @@ import {
   User, 
   Clock, 
   MapPin, 
-  ArrowLeft
+  ArrowLeft,
+  AlertTriangle,
+  ExternalLink
 } from 'lucide-react';
 
 const TrailDetailScreen = () => {
   const { id } = useParams();
   const [trail, setTrail] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Split difficulty into riding type and level
   const splitDifficulty = (difficulty) => {
     if (!difficulty) return { ridingType: '', difficultyLevel: '' };
     const parts = difficulty.split(',').map(part => part.trim());
@@ -33,33 +35,50 @@ const TrailDetailScreen = () => {
   useEffect(() => {
     const fetchTrail = async () => {
       try {
+        setLoading(true);
         const data = await trailService.getTrailById(id);
-        setTrail(data);
+        console.log('Trail data:', data);
+        if (!data) {
+          setError('המסלול לא נמצא');
+        } else {
+          setTrail(data);
+        }
       } catch (error) {
         console.error('Error fetching trail:', error);
+        setError('שגיאה בטעינת המסלול');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchTrail();
   }, [id]);
 
   if (loading) {
-    return <div className="text-center py-8">טוען מידע על המסלול...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-xl">טוען מידע על המסלול...</div>
+      </div>
+    );
   }
 
-  if (!trail) {
-    return <div className="text-center py-8">המסלול לא נמצא</div>;
+  if (error || !trail) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="text-xl text-red-500 mb-4">{error || 'המסלול לא נמצא'}</div>
+        <Link 
+          to="/search"
+          className="text-blue-600 hover:text-blue-700 flex items-center"
+        >
+          <ArrowLeft className="h-4 w-4 ml-1" />
+          חזרה לחיפוש
+        </Link>
+      </div>
+    );
   }
 
   const { ridingType, difficultyLevel } = splitDifficulty(trail.properties.difficulty);
-
-  // Mock weather data - replace with actual API call
-  const weatherData = {
-    temperature: 22,
-    windSpeed: 10,
-    precipitation: 0
-  };
+  const hasGPS = trail.geometry?.coordinates?.length > 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6" dir="rtl">
@@ -74,9 +93,37 @@ const TrailDetailScreen = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <h1 className="text-3xl font-bold mb-4">{trail.properties.name}</h1>
+          <div className="flex justify-between items-start mb-4">
+            <h1 className="text-3xl font-bold">{trail.properties.name}</h1>
+            {trail.properties.detailUrl && (
+              <a 
+                href={trail.properties.detailUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center text-blue-600 hover:text-blue-700 text-sm"
+              >
+                צפה במקור
+                <ExternalLink className="h-4 w-4 mr-1" />
+              </a>
+            )}
+          </div>
           
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            {!hasGPS && (
+              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <AlertTriangle className="h-5 w-5 text-yellow-400" />
+                  </div>
+                  <div className="mr-3">
+                    <p className="text-sm text-yellow-700">
+                      מסלול זה אינו כולל נתוני GPS. המיקום המדויק והתצוגה במפה אינם זמינים.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
               {/* Riding Type */}
               <div className="flex items-center">
@@ -143,16 +190,32 @@ const TrailDetailScreen = () => {
             </div>
 
             {/* Map */}
-            <div className="h-[400px] relative rounded-lg overflow-hidden">
-              <MapComponent trails={[trail]} centered={true} />
-            </div>
+            {hasGPS ? (
+              <div className="h-[400px] relative rounded-lg overflow-hidden">
+                <MapComponent trails={[trail]} centered={true} />
+              </div>
+            ) : (
+              <div className="bg-gray-50 rounded-lg p-6 text-center">
+                <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-600">
+                  מסלול זה אינו כולל נתוני GPS. תצוגת המפה אינה זמינה.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Weather Info */}
         <div>
-          {trail.geometry && trail.geometry.coordinates && (
+          {hasGPS && trail.geometry?.coordinates ? (
             <WeatherInfo coordinates={trail.geometry.coordinates} />
+          ) : (
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-semibold mb-4">מזג אוויר</h2>
+              <div className="text-center text-gray-600">
+                מידע על מזג האוויר אינו זמין עבור מסלול זה
+              </div>
+            </div>
           )}
         </div>
       </div>
