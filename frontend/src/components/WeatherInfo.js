@@ -1,4 +1,3 @@
-// frontend/src/components/WeatherInfo.js
 import React, { useState, useEffect } from 'react';
 import { weatherService } from '../services/weatherService';
 import { ThermometerSun, Wind, Droplets, Cloud } from 'lucide-react';

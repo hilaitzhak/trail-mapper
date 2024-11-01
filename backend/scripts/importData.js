@@ -1,4 +1,3 @@
-// backend/scripts/importData.js
 const fs = require('fs').promises;
 const path = require('path');
 const { pool } = require('../config/db');

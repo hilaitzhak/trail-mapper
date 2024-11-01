@@ -1,10 +1,8 @@
-// frontend/src/screens/TrailDetailScreen.js
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { trailService } from '../services/trailService';
 import MapComponent from '../components/MapComponent';
 import WeatherInfo from '../components/WeatherInfo';
-
 import { 
   Mountain, 
   Route, 
@@ -13,8 +11,7 @@ import {
   Clock, 
   MapPin, 
   ArrowLeft,
-  AlertTriangle,
-  ExternalLink
+  AlertTriangle
 } from 'lucide-react';
 
 const TrailDetailScreen = () => {
@@ -82,7 +79,6 @@ const TrailDetailScreen = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6" dir="rtl">
-      {/* Back Button */}
       <Link 
         to="/search" 
         className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4"
@@ -95,17 +91,6 @@ const TrailDetailScreen = () => {
         <div className="lg:col-span-2">
           <div className="flex justify-between items-start mb-4">
             <h1 className="text-3xl font-bold">{trail.properties.name}</h1>
-            {trail.properties.detailUrl && (
-              <a 
-                href={trail.properties.detailUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center text-blue-600 hover:text-blue-700 text-sm"
-              >
-                צפה במקור
-                <ExternalLink className="h-4 w-4 mr-1" />
-              </a>
-            )}
           </div>
           
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">

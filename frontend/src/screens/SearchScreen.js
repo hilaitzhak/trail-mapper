@@ -6,7 +6,6 @@ import { Search, Mountain, Route } from 'lucide-react';
 
 const SearchScreen = () => {
   const navigate = useNavigate();
-  const [trails, setTrails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [allTrails, setAllTrails] = useState([]);
   const [filteredTrails, setFilteredTrails] = useState([]);
@@ -114,16 +113,6 @@ useEffect(() => {
       difficultyLevel: parts[1] || parts[0]
     };
   };
-
-  // Debug rendering
-  console.log('Current state:', {
-    trailsCount: trails.length,
-    loading,
-    error,
-    uniqueAreas,
-    uniqueRidingTypes,
-    uniqueDifficultyLevels
-  });
 
   if (loading) {
     return (

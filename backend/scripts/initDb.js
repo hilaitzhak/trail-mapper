@@ -37,5 +37,4 @@ async function initializeDatabase() {
   }
 }
 
-// Run initialization
 initializeDatabase();
