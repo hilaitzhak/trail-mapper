@@ -3,12 +3,11 @@ require('dotenv').config();
 
 // Database configuration
 const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'trail_mapper',
-  password: process.env.DB_PASSWORD || 'YOUR_PASSWORD_HERE', // Replace with your actual password
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT || 5432,
-  // Additional pool configuration
   max: 20, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
   connectionTimeoutMillis: 2000, // How long to wait before timing out when connecting a new client

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MapComponent from '../components/MapComponent';
-import { Search, Mountain, Wind, ThermometerSun } from 'lucide-react';
+import { Mountain, Wind, MapPin, ThermometerSun } from 'lucide-react';
 import { trailService } from '../services/trailService';
 
 const HomeScreen = () => {
@@ -59,7 +59,7 @@ const HomeScreen = () => {
                 <div className="text-center p-6">
                 <Mountain className="h-12 w-12 mx-auto text-blue-600 mb-4" />
                 <h3 className="text-lg font-semibold mb-2">מידע על המסלול</h3>
-                <p className="text-gray-600">תיאורי מסלולים מפורטים, רמות קושי ונתוני גובה</p>
+                <p className="text-gray-600">תיאורי מסלולים מפורטים, רמות קושי ומרחקים</p>
                 </div>
                 <div className="text-center p-6">
                 <ThermometerSun className="h-12 w-12 mx-auto text-blue-600 mb-4" />
@@ -67,9 +67,9 @@ const HomeScreen = () => {
                 <p className="text-gray-600">תנאי מזג אוויר בזמן אמת לכל מיקום מסלול</p>
                 </div>
                 <div className="text-center p-6">
-                <Wind className="h-12 w-12 mx-auto text-blue-600 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">סוגי שטח</h3>
-                <p className="text-gray-600">סנן מסלולים לפי שטח: יער, הרים, חוף ועוד</p>
+                <MapPin className="h-12 w-12 mx-auto text-blue-600 mb-4" />
+                <h3 className="text-lg font-semibold mb-2">איזורים</h3>
+                <p className="text-gray-600">סנן מסלולים לפי איזור: השרון, ירושלים והסביבה, השפלה ועוד</p>
                 </div>
             </div>
             </div>
@@ -106,16 +106,6 @@ const HomeScreen = () => {
             )}
             </div>
         </div>
-
-        {/* Map Preview */}
-        {/* <div className="relative">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <h2 className="text-2xl font-bold mb-6">מפת המסלולים</h2>
-            <div className="h-[400px]">
-                <MapComponent />
-            </div>
-            </div>
-        </div> */}
 
         {/* Call to Action */}
         <div className="bg-blue-600 text-white py-12">

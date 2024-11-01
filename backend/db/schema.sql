@@ -4,8 +4,8 @@ CREATE TABLE trails (
     trail_id VARCHAR(50) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
     area VARCHAR(100),
-    riding_type VARCHAR(50),    -- For XC, etc.
-    difficulty_level VARCHAR(50), -- For בינוני, etc.
+    riding_type VARCHAR(50),
+    difficulty_level VARCHAR(50),
     distance NUMERIC,
     time VARCHAR(20),
     creator VARCHAR(100),
