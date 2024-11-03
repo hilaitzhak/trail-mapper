@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const trailRoutes = require('./routes/trails.route');
-const healthRoutes = require('./routes/health-routes');
 require('dotenv').config();
 
 const app = express();
@@ -11,7 +10,6 @@ app.use(express.json());
 
 // Routes
 app.use('/api', trailRoutes);
-app.use('/api', healthRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {
