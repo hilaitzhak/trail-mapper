@@ -60,7 +60,7 @@ CREATE DATABASE trail_mapper;
 \c trail_mapper
 
 # Run the schema script
-\i backend/database/schema.sql
+\i backend/db/schema.sql
 ```
 
 3. **Backend Setup**
