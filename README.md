@@ -122,7 +122,7 @@ The application will be available at `http://localhost:3000`
 trail-mapper/
 ├── backend/
 │   ├── config/          # Database and server configuration
-│   ├── database/        # Database schema and migrations
+│   ├── db/        # Database schema and migrations
 │   ├── models/          # Database models
 │   ├── routes/          # API routes
 │   ├── scripts/         # Data import scripts
