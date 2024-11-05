@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const trailRoutes = require('./routes/trails.route');
+const trailRoutes = require('./routes/trailsRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -10,11 +10,6 @@ app.use(express.json());
 
 // Routes
 app.use('/api', trailRoutes);
-
-// Basic route for testing
-app.get('/', (req, res) => {
-  res.json({ message: 'Trail Mapper API' });
-});
 
 // Error handling
 app.use((err, req, res, next) => {

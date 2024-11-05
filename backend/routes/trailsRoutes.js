@@ -1,32 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { pool } = require('../config/db');
+const TrailService = require('../services/trailService');
 
 // Get trail by ID
 router.get('/trails/:id', async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT 
-        t.*,
-        CASE 
-          WHEN COUNT(tc.id) = 0 THEN NULL
-          ELSE json_agg(
-            json_build_array(tc.longitude, tc.latitude)
-            ORDER BY tc.sequence_num
-          )
-        END as coordinates
-      FROM trails t
-      LEFT JOIN trail_coordinates tc ON t.trail_id = tc.trail_id
-      WHERE t.trail_id = $1
-      GROUP BY t.id, t.trail_id, t.name, t.area, t.riding_type, t.difficulty_level,
-               t.distance, t.time, t.creator, t.date_created, t.has_gps, t.detail_url
-    `, [req.params.id]);
+    const trail = await TrailService.getTrailById(req.params.id);
 
-    if (result.rows.length === 0) {
+    if (!trail) {
       return res.status(404).json({ error: 'Trail not found' });
     }
-
-    const trail = result.rows[0];
 
     // Format response to match GeoJSON structure
     const response = {
@@ -59,23 +42,9 @@ router.get('/trails/:id', async (req, res) => {
 // Get all trails
 router.get('/trails', async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT 
-        t.*,
-        CASE 
-          WHEN COUNT(tc.id) = 0 THEN NULL
-          ELSE json_agg(
-            json_build_array(tc.longitude, tc.latitude)
-            ORDER BY tc.sequence_num
-          )
-        END as coordinates
-      FROM trails t
-      LEFT JOIN trail_coordinates tc ON t.trail_id = tc.trail_id
-      GROUP BY t.id, t.trail_id, t.name, t.area, t.riding_type, t.difficulty_level,
-               t.distance, t.time, t.creator, t.date_created, t.has_gps, t.detail_url
-    `);
+    const trails = await TrailService.getAllTrails();
 
-    const features = result.rows.map(trail => ({
+    const features = trails.map(trail => ({
       type: "Feature",
       properties: {
         id: trail.trail_id,
